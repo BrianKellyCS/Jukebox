@@ -24,7 +24,7 @@ class Jukebox(object):
 
         while query != 'q':
             self.current_media = -1
-            query = input("user@JukeBox:~> ").lower()
+            query = input("user@Jukebox:~> ").lower()
             if query == 'help':
                 self.menu()
             if query == 'r':
@@ -84,27 +84,30 @@ class Jukebox(object):
     #Helper for search
     def search_directory(self,input):
         '''checks if the input (song or artist) is in playlist directory'''
-        
-        input = input.lower()
+        try:
+            input = input.lower()
 
-        path = self.video_path if self.video == True else self.music_path
-        list = os.listdir(path)
-        media = -1 #Initialize as -1 in case not found
-        
-        for song in list:
-            song = song.lower()
-            temp_name = song #to avoid making changes to song names
-            temp_name = temp_name.split('.') #Get rid of extension in name
-            temp_name = temp_name[0]#.split(' ') #split name to search for word in title
-            print('first temp_name : ', temp_name)
+            path = self.video_path if self.video == True else self.music_path
+            list = os.listdir(path)
+            media = -1 #Initialize as -1 in case not found
+            
+            for song in list:
+                song = song.lower()
+                temp_name = song #to avoid making changes to song names
+                temp_name = temp_name.split('.') #Get rid of extension in name
+                temp_name = temp_name[0]#.split(' ') #split name to search for word in title
+                print('first temp_name : ', temp_name)
 
-            if input in temp_name:
-                print('iterating:', temp_name)
-                media = f'{path}{song}'
+                if input in temp_name:
+                    print('iterating:', temp_name)
+                    media = f'{path}{song}'
 
-        #Reset variables from youtube search
-        self.from_youtube = False
-        self.current_yt_song = ''
+            #Reset variables from youtube search
+            self.from_youtube = False
+            self.current_yt_song = ''
+        except Exception as e:
+            print("Add playlist audio/video directories to search locally")
+            media = -1
         
         return media 
 
