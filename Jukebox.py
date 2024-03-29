@@ -12,8 +12,7 @@ class Jukebox(object):
         self.Radio = 'https://media-ice.musicradio.com/Heart80sMP3'
         self.from_youtube = False
         self.current_yt_song = ''
-        self.audio = False
-        self.video = False
+        self.currentMediaType = "audio"   #will be either audio or video
         self.current_media = -1
 
 
@@ -30,19 +29,17 @@ class Jukebox(object):
             if query == 'r':
                 self.current_media = self.Radio
             elif ' -a' in query:
-                self.audio = True
-                self.video = False
+                self.currentMediaType = "audio"
                 query = query[0:-3]
                 print(query)
                 self.current_media = self.search(query)
             elif ' -v' in query:
-                self.video = True
-                self.audio = False
+                self.currentMediaType = "video"
                 query = query[0:-3]
                 print(query)
                 self.current_media = self.search(query)
             elif self.current_media == -1 and query != 'q' and query != 'help':
-                print('Specify if you want just audio/video by adding -a or -v after your query (type "help" for more info)')
+                print('Specify if you want audio/video by adding -a or -v after your query (type "help" for more info)')
                 
 
             if self.current_media != -1:
@@ -60,14 +57,19 @@ class Jukebox(object):
         print('\t-a\t\tAudio\t\t{search query} -a\n')
         print('\t-v\t\tVideo\t\t{search query} -v\n')
 
-    def play(self,media):
+    def play(self,media_list):
+        print(media_list)
+
         try:
-            if self.audio == True:
-                os.system(f'mpv --no-video "{media}"')
+            if self.currentMediaType == "audio":
+                print(f"Playing: {media_list}")
+                os.system(f'mpv --no-video {media_list}')
             else:
-                os.system(f'mpv "{media}"')
+                print(f"Playing: {media_list}")
+                os.system(f'mpv {media_list}')
         except Exception as e:
             print(e)
+
 
     def search(self,input):
 
@@ -86,21 +88,31 @@ class Jukebox(object):
         '''checks if the input (song or artist) is in playlist directory'''
         try:
             input = input.lower()
+            input = input.split(' ')
 
-            path = self.video_path if self.video == True else self.music_path
+            path = self.video_path if self.currentMediaType == "video" else self.music_path
+            print(path)
             list = os.listdir(path)
-            media = -1 #Initialize as -1 in case not found
+            media = "" #Initialize as -1 in case not found
             
             for song in list:
+                print("LOOKING IN PATH")
                 song = song.lower()
                 temp_name = song #to avoid making changes to song names
                 temp_name = temp_name.split('.') #Get rid of extension in name
-                temp_name = temp_name[0]#.split(' ') #split name to search for word in title
-                print('first temp_name : ', temp_name)
+                temp_name = temp_name[0] #searches for word in title
+                temp_name = temp_name.split(' ')
+                print('first song in list temp_name : ', temp_name)
 
-                if input in temp_name:
-                    print('iterating:', temp_name)
-                    media = f'{path}{song}'
+                counter = 0
+                for word in input:
+                    for wordd in temp_name:
+                        if word == wordd:
+                            counter+=1
+                if counter == len(input):
+                    media+=(f'"{path}{song}" ')
+
+
 
             #Reset variables from youtube search
             self.from_youtube = False
@@ -108,7 +120,7 @@ class Jukebox(object):
         except Exception as e:
             print("Add playlist audio/video directories to search locally")
             media = -1
-        
+        print("****",media,"****")
         return media 
 
     #Helper for search
@@ -131,8 +143,11 @@ class Jukebox(object):
         return(audio)
 
     def download(self):
-        '''gets current youtube song (current_yt_song) playing and downloads it to playlist directory'''
-        os.system(f'yt-dlp -x -f m4a {self.current_yt_song}')
+        '''gets current youtube song (current_yt_song) playing and downloads it to playlist directory as proper media type'''
+        if self.currentMediaType == "audio":
+            os.system(f'yt-dlp -x -f m4a -o "playlists/music/%(title)s.%(ext)s" {self.current_yt_song}')
+        else:
+            os.system(f'yt-dlp -o "playlists/videos/%(title)s.%(ext)s" {self.current_yt_song}')
         
         print('Song saved in playlist')
 
