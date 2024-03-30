@@ -1,16 +1,17 @@
 import re,urllib.parse,urllib.request
 import os
+import colorama
 
-
+colorama.init()
 
 class Color:
-    RESET = '\033[0m'
-    RED = '\033[1;31m'    # Brighter Red
-    GREEN = '\033[1;32m'  # Neon Green
-    YELLOW = '\033[1;33m' # Brighter Yellow
-    BLUE = '\033[1;34m'
-    MAGENTA = '\033[1;35m'
-    CYAN = '\033[1;36m'
+    RESET = colorama.Style.RESET_ALL
+    RED = colorama.Fore.LIGHTRED_EX    # Brighter Red
+    GREEN = colorama.Fore.LIGHTGREEN_EX  # Neon Green
+    YELLOW = colorama.Fore.LIGHTYELLOW_EX # Brighter Yellow
+    BLUE = colorama.Fore.LIGHTBLUE_EX
+    MAGENTA = colorama.Fore.LIGHTMAGENTA_EX
+    CYAN = colorama.Fore.LIGHTCYAN_EX
 
 
 
