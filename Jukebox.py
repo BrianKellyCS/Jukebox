@@ -1,29 +1,45 @@
-
 import re,urllib.parse,urllib.request
 import os
 
 
+
+class Color:
+    RESET = '\033[0m'
+    RED = '\033[31m'
+    GREEN = '\033[32m'
+    YELLOW = '\033[33m'
+    BLUE = '\033[34m'
+    MAGENTA = '\033[35m'
+    CYAN = '\033[36m'
 
 
 class Jukebox(object):
     def __init__(self):
         self.music_path = 'playlists/music/'
         self.video_path = 'playlists/videos/'
-        self.Radio = 'https://media-ice.musicradio.com/Heart80sMP3'
+        self.Radio = 'https://media-ice.musicradio.com/Heart80s'
         self.from_youtube = False
         self.current_yt_song = ''
         self.currentMediaType = "audio"   #will be either audio or video
         self.current_media = -1
 
-
+    def colored_prompt(self, user='user', at='@', jukebox='Jukebox', colon=':', tilde='~', greater_than='>'):
+        # Constructing the prompt with different colors
+        prompt = f"{Color.RED}{user}{Color.RESET}" \
+                f"{Color.GREEN}{at}{Color.RESET}" \
+                f"{Color.YELLOW}{jukebox}{Color.RESET}" \
+                f"{Color.BLUE}{colon}{Color.RESET}" \
+                f"{Color.MAGENTA}{tilde}{Color.RESET}" \
+                f"{Color.CYAN}{greater_than}{Color.RESET} "
         
+        return prompt
 
     def start(self):
         query = ''
 
         while query != 'q':
             self.current_media = -1
-            query = input("user@Jukebox:~> ").lower()
+            query = input(self.colored_prompt()).lower()
             if query == 'help':
                 self.menu()
             if query == 'r':
@@ -73,15 +89,15 @@ class Jukebox(object):
 
     def search(self,input):
 
-        #Case 1: Check if song is already in playlist directory. 
-        song = self.search_directory(input) if self.search_directory(input) != -1 else ''
+        #Case 1: Check if media is already in playlist directory. 
+        media = self.search_directory(input) if self.search_directory(input) != -1 else ''
 
 
-        #Case 2: Search youtube for song
-        if song == '':
-            song = self.search_youtube(input)
+        #Case 2: Search youtube for media
+        if media == '':
+            media = self.search_youtube(input)
 
-        return song
+        return media
 
     #Helper for search
     def search_directory(self,input):
@@ -105,9 +121,9 @@ class Jukebox(object):
                 print('first song in list temp_name : ', temp_name)
 
                 counter = 0
-                for word in input:
-                    for wordd in temp_name:
-                        if word == wordd:
+                for word_in_input in input:
+                    for word_in_song_name in temp_name:
+                        if word_in_input == word_in_song_name:
                             counter+=1
                 if counter == len(input):
                     media+=(f'"{path}{song}" ')
@@ -120,7 +136,6 @@ class Jukebox(object):
         except Exception as e:
             print("Add playlist audio/video directories to search locally")
             media = -1
-        print("****",media,"****")
         return media 
 
     #Helper for search
@@ -158,12 +173,3 @@ class Jukebox(object):
 if __name__ == "__main__":
     Jukebox = Jukebox()
     Jukebox.start()
-
-
-
-
-
-
-
-
-
