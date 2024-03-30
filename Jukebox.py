@@ -40,14 +40,8 @@ class Jukebox(object):
 
 
     def colored_prompt(self, user='user', at='@', jukebox='Jukebox', colon=':', tilde='~', greater_than='>', now_playing=''):
-        # If something is currently playing, include it in the prompt
-        if now_playing:
-            now_playing_part = f"{Color.MAGENTA}Now Playing: {now_playing} {Color.RESET}"
-        else:
-            now_playing_part = ""
-            
-        prompt = f"{now_playing_part}" \
-                f"{Color.RED}{user}{Color.RESET}" \
+
+        prompt = f"{Color.RED}{user}{Color.RESET}" \
                 f"{Color.GREEN}{at}{Color.RESET}" \
                 f"{Color.YELLOW}{jukebox}{Color.RESET}" \
                 f"{Color.BLUE}{colon}{Color.RESET}" \
