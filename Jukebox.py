@@ -23,9 +23,29 @@ class Jukebox(object):
         self.currentMediaType = "audio"   #will be either audio or video
         self.current_media = -1
 
-    def colored_prompt(self, user='user', at='@', jukebox='Jukebox', colon=':', tilde='~', greater_than='>'):
-        # Constructing the prompt with different colors
-        prompt = f"{Color.RED}{user}{Color.RESET}" \
+    def welcome_screen(self):
+        ascii_art = """
+   ___       _        _               
+  |_  |     | |      | |              
+    | |_   _| | _____| |__   _____  __
+    | | | | | |/ / _ \ '_ \ / _ \ \/ /
+/\__/ / |_| |   <  __/ |_) | (_) >  < 
+\____/ \__,_|_|\_\___|_.__/ \___/_/\_\                 
+        """
+        print(Color.CYAN + ascii_art + Color.RESET)
+        print(Color.YELLOW + "Welcome to the Terminal Jukebox!" + Color.RESET)
+        print(Color.GREEN + "Type 'help' to see the command list and to see MPV controls\n" + Color.RESET)
+
+
+    def colored_prompt(self, user='user', at='@', jukebox='Jukebox', colon=':', tilde='~', greater_than='>', now_playing=''):
+        # If something is currently playing, include it in the prompt
+        if now_playing:
+            now_playing_part = f"{Color.MAGENTA}Now Playing: {now_playing} {Color.RESET}"
+        else:
+            now_playing_part = ""
+            
+        prompt = f"{now_playing_part}" \
+                f"{Color.RED}{user}{Color.RESET}" \
                 f"{Color.GREEN}{at}{Color.RESET}" \
                 f"{Color.YELLOW}{jukebox}{Color.RESET}" \
                 f"{Color.BLUE}{colon}{Color.RESET}" \
@@ -34,9 +54,10 @@ class Jukebox(object):
         
         return prompt
 
+
     def start(self):
         query = ''
-
+        self.welcome_screen()
         while query != 'q':
             self.current_media = -1
             query = input(self.colored_prompt()).lower()
@@ -68,10 +89,23 @@ class Jukebox(object):
         
     def menu(self):
         print('\n\n\tCommand\t\tDesc.\t\tUseage\n')
-        print('\tq\t\tQuit\t\tq\n')
+        print('\tq\t\tQuit Jukebox\tq\n')
         print('\tr\t\tRadio\t\tr\n')
         print('\t-a\t\tAudio\t\t{search query} -a\n')
         print('\t-v\t\tVideo\t\t{search query} -v\n')
+
+        print('\n\tMPV Playback Controls:\n')
+        print('\tSPACE\t\tPlay/Pause\tSpace\n')
+        print('\tq\t\tStop Playback & Quit MPV\tq (while in MPV)\n')
+        print('\t>\t\tNext in Playlist\tShift + .\n')
+        print('\t<\t\tPrevious in Playlist\tShift + ,\n')
+        print('\t←/→\t\tSeek Backwards/Forwards\tArrow Left / Arrow Right\n')
+        print('\tm\t\tMute\t\tm\n')
+        print('\tf\t\tToggle Fullscreen\tf\n')
+        print('\t9/0\t\tDecrease/Increase Volume\t9 / 0\n')
+
+        print('\nNote: These controls are active when MPV is the focused window.\n')
+
 
     def play(self,media_list):
         print(media_list)
