@@ -336,7 +336,7 @@ class Jukebox(object):
 
     def play(self,media_list):
         try:
-            if self.currentMediaType == "Music":
+            if self.currentMediaType == "Music" or self.current_media == self.Radio:
                 print(f"Playing: {media_list}")
                 os.system(f'mpv --no-video {media_list}')
             else:
