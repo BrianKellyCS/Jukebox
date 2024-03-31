@@ -65,4 +65,8 @@ While MPV is focused, you can use the following controls:
 
 You can customize the directories for music and videos by editing the `music_path` and `video_path` attributes in the `Jukebox` class.
 
+### Customizing Streaming Radio
+
+To change streaming radio station, you can modify the `self.Radio` attribute in the `Jukebox` class. Find the streaming URL by visiting `https://media-ice.musicradio.com` and selecting the desired radio station. Replace the `self.Radio` value with the direct streaming URL of your choice.
+
 
