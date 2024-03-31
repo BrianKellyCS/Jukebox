@@ -1,8 +1,8 @@
 {
-    "user_name": "x-0901",
+    "user_name": "x-091",
     "directories": {
         "music_path": "Music/",
-        "movies_path": "Movies/",
+        "movies_path": "/media/user/T7 Shield/Media",
         "playlists_path": "Playlists/"
     }
 }

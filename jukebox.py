@@ -91,17 +91,82 @@ class Jukebox(object):
                 self.index_directory(entry.path, new_parent_id, conn, seen_paths)
 
         if created_new_connection:
-            # After indexing, remove entries that were not seen
-            #cursor.execute("SELECT path FROM directories")
-            #all_paths = set(path for (path,) in cursor.fetchall())
-            #missing_paths = all_paths - seen_paths
-            #for missing_path in missing_paths:
-                #cursor.execute("DELETE FROM directories WHERE path = ?", (missing_path,))
-            
             conn.commit()
             conn.close()
 
+    def explore(self):
+        media_options = {
+            1: ("Movies", self.movies_path),
+            2: ("Music", self.music_path),
+            3: ("Playlists", self.playlists_path)
+        }
+        
+        while True:
+            print("Select media type to explore:")
+            for key, (name, _) in media_options.items():
+                print(f"({key}) {name}")
+            print("(q) Quit")
+            
+            choice = input("\nEnter your choice: ").strip().lower()
 
+            
+            if choice == 'q':
+                break
+            
+            try:
+                choice_idx = int(choice)
+                if choice_idx in media_options:
+                    if choice_idx == 1:
+                        self.currentMediaType = "Movies"
+                    else:
+                        self.currentMediaType = "Music"
+                    _, start_path = media_options[choice_idx]
+                    print(self.currentMediaType,")!!!!!!!!!!!!!!!!!!!!!!!!")
+                    self.navigate_directory(start_path)
+                else:
+                    print("Invalid selection. Please try again.")
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+
+    def navigate_directory(self, current_path):
+        history_stack = []
+
+        while True:
+            print(f"\nExploring: {current_path}\n")
+            dirs_and_files = os.listdir(current_path)
+            dirs_and_files.sort(key=lambda x: (not os.path.isdir(os.path.join(current_path, x)), x.lower()))
+
+            for idx, entry in enumerate(dirs_and_files, start=1):
+                entry_path = os.path.join(current_path, entry)
+                print(f"({idx}) {'[D]' if os.path.isdir(entry_path) else '[F]'} {entry}")
+
+            print("\n(0) Go Back")
+            choice = input("\nEnter number to explore or 'q' to quit: ").strip()
+
+            if choice.lower() == 'q':
+                break
+            elif choice == '0':
+                if history_stack:
+                    current_path = history_stack.pop()
+                else:
+                    print("No more parent directories.")
+                    break  # Exit the navigation if there are no more parent directories
+            else:
+                try:
+                    choice_idx = int(choice) - 1
+                    if choice_idx >= 0 and choice_idx < len(dirs_and_files):
+                        selected_path = os.path.join(current_path, dirs_and_files[choice_idx])
+                        if os.path.isdir(selected_path):
+                            history_stack.append(current_path)
+                            current_path = selected_path
+                        else:
+                            print(f"Selected File: {selected_path}")
+                            self.play(f'"{selected_path}"')
+                            # Add logic here for file actions (e.g., playing a file)
+                    else:
+                        print("Invalid selection.")
+                except ValueError:
+                    print("Please enter a valid number.")
 
     def list_directory_contents(self,parent_id=None, level=0):
         conn = sqlite3.connect('jukebox.db')
@@ -118,28 +183,6 @@ class Jukebox(object):
                 self.list_directory_contents(item[0], level + 1)
 
         conn.close()
-
-
-    def search_db_directory(self, query):
-        conn = sqlite3.connect('jukebox.db')
-        cursor = conn.cursor()
-        
-        # Ensure results are ordered by name for a natural sorting
-        cursor.execute("SELECT id, name, path, is_folder FROM directories WHERE name LIKE ? ORDER BY name", ('%' + query + '%',))
-        
-        results = cursor.fetchall()
-        paths = []
-        
-        if results:
-            for result in results:
-                if not result[3]:  # If the result is a file, it's added to the list
-                    paths.append(f'"{result[2]}"')  # Quote the path to handle spaces
-
-        conn.close()
-        
-        # Join the sorted paths with spaces for MPV command
-        return ' '.join(sorted(paths))
-
 
     def index_all(self,):
         seen_paths = set()  # Initialize seen_paths once for all indexing operations
@@ -159,7 +202,6 @@ class Jukebox(object):
 
         conn.commit()
         conn.close()
-
 
     def save_config(self):
         with open('config.json', 'w') as config_file:
@@ -182,8 +224,6 @@ class Jukebox(object):
             print(Color.YELLOW + f"Welcome to the Terminal Jukebox!" + Color.RESET)       
         print(Color.GREEN + "Type 'help' to see the command list and MPV controls\n" + Color.RESET)
 
-
-
     def colored_prompt(self):
 
         prompt = f"{Color.RED}{self.user_name}{Color.RESET}" \
@@ -195,7 +235,6 @@ class Jukebox(object):
         
         return prompt
 
-
     def update_username(self):
         new_user_name = input(Color.GREEN + "Enter your new user name: " + Color.RESET).strip()
         if new_user_name:  # Check if the user actually entered something
@@ -206,19 +245,29 @@ class Jukebox(object):
         else:
             print(Color.RED + "Username update cancelled." + Color.RESET)
 
-
     def start(self):
         query = ''
         self.welcome_screen()
         while query != 'q':
             self.current_media = -1
-            query = input(self.colored_prompt()).lower()
+            query = input(self.colored_prompt())
             if query == 'help':
                 self.menu()
             if query == 'r':
                 self.current_media = self.Radio
             if query == 'u':
                 self.update_username()
+            if query == 's':
+                self.index_all()
+            if query == 'e':
+                self.explore()
+
+            elif 'www.youtube.com' in query:
+                if ' -a' in query:
+                    self.download_song(query[0:-3])
+                else:
+                    self.download_video(query)
+
             elif ' -a' in query:
                 self.currentMediaType = "Music"
                 query = query[0:-3]
@@ -240,14 +289,28 @@ class Jukebox(object):
                     to_download = input('\n\nSave to directory? (y/n)')
                     if to_download == 'y':
                         self.download()
-        
+
+    def download_song(self,query):
+        os.system(f'yt-dlp -x -f m4a -o "{self.music_path}/%(title)s.%(ext)s" {query}')
+
+    def download_video(self,query):
+        os.system(f'yt-dlp -o "{self.movies_path}/%(title)s.%(ext)s" {query}')
+
     def menu(self):
-        print('\n\n\tCommand\t\tDesc.\t\t\tUseage\n')
-        print('\tq\t\tQuit Jukebox\t\tq\n')
-        print('\tu\t\tUpdate Username\t\tu\n')
-        print('\tr\t\tRadio\t\t\tr\n')
-        print('\t-a\t\tAudio\t\t\t{search query} -a\n')
-        print('\t-v\t\tVideo\t\t\t{search query} -v\n')
+        print('\n\n\tCommand\t\tDesc.\t\t\t\tUsage\n')
+        print('\te\t\tExplore Directories\t\te\n')
+        print('\ts\t\tRe-scan Directories\t\ts\n')
+        print('\tq\t\tQuit Jukebox\t\t\tq\n')
+        print('\tu\t\tUpdate Username\t\t\tu\n')
+        print('\tr\t\tRadio\t\t\t\tr\n')
+        print('\t-a\t\tAudio\t\t\t\t{search query} -a\n')
+        print('\t-v\t\tVideo\t\t\t\t{search query} -v\n')
+
+        # Added explanation for YouTube link downloading feature
+        print('\tYouTube Link\tDownload from YouTube\t\tPaste a YouTube link directly to download video.\n'
+            '\t\t\t\t\t\t\tAdd "-a" after the link to download audio only.\n'
+            '\t\t\t\t\t\t\tVideos are saved to the Movies directory;\n'
+            '\t\t\t\t\t\t\taudio files are saved to the Music directory.\n')
 
         print('\n\tMPV Playback Controls:\n')
         print('\tSPACE\t\tPlay/Pause\n')
@@ -257,14 +320,11 @@ class Jukebox(object):
         print('\t←/→\t\tSeek Backwards/Forwards\n')
         print('\tm\t\tMute\n')
         print('\tf\t\tToggle Fullscreen\n')
-        print('\t9/0\t\tDecrease/Increase Volumen')
+        print('\t9/0\t\tDecrease/Increase Volume\n')
 
         print('\nNote: These controls are active when MPV is the focused window.\n')
 
-
     def play(self,media_list):
-        print(media_list)
-
         try:
             if self.currentMediaType == "Music":
                 print(f"Playing: {media_list}")
@@ -275,11 +335,10 @@ class Jukebox(object):
         except Exception as e:
             print(e)
 
-
     def search(self,input):
 
         #Case 1: Check if media is already in playlist directory. 
-        media = self.search_db_directory(input) if self.search_db_directory(input) != -1 else ''
+        media = self.search_db_directory(input)# if self.search_db_directory(input) != -1 else ''
 
 
         #Case 2: Search youtube for media
@@ -288,44 +347,80 @@ class Jukebox(object):
 
         return media
 
-    #Helper for search
-    def search_directory(self,input):
-        '''checks if the input (song or artist) is in playlist directory'''
+    #Helper for search for local media
+    def search_db_directory(self, query):
+        media = ""
         try:
-            input = input.lower()
-            input = input.split(' ')
-
-            path = self.movies_path if self.currentMediaType == "Movie" else self.music_path
-            print(path)
-            list = os.listdir(path)
-            media = "" #Initialize as -1 in case not found
+            conn = sqlite3.connect('jukebox.db')
+            cursor = conn.cursor()
             
-            for song in list:
-                print("LOOKING IN PATH")
-                song = song.lower()
-                temp_name = song #to avoid making changes to song names
-                temp_name = temp_name.split('.') #Get rid of extension in name
-                temp_name = temp_name[0] #searches for word in title
-                temp_name = temp_name.split(' ')
-                print('first song in list temp_name : ', temp_name)
+            # Normalize the search query by replacing periods with spaces
+            normalized_query = query.replace('.', ' ')
+            
+            # Determine the base path to search in based on the current media type
+            base_path = self.music_path if self.currentMediaType == "Music" else self.movies_path
+            
+            # Use the normalized query for a case-insensitive search, restricted to the base path
+            cursor.execute("""
+                SELECT id, name, path, is_folder 
+                FROM directories 
+                WHERE REPLACE(name, '.', ' ') LIKE ? 
+                AND path LIKE ? 
+                ORDER BY name
+                """, ('%' + normalized_query + '%', base_path + '%',))
+            
+            results = cursor.fetchall()
+            paths = []
+             # Check if any results are TV shows
+            tv_shows = [result for result in results if "T.V. Shows" in result[2] and result[3]]
 
-                counter = 0
-                for word_in_input in input:
-                    for word_in_song_name in temp_name:
-                        if word_in_input == word_in_song_name:
-                            counter+=1
-                if counter == len(input):
-                    media+=(f'"{path}{song}" ')
+            if tv_shows:
+                conn.close()
+                return f'"{self.list_tv_show_seasons(tv_shows)}"'
+            
+            else:
+                if results:
+                    for result in results:
+                        if not result[3]:  # If the result is a file, it's added to the list
+                            paths.append(f'"{result[2]}"')  # Quote the path to handle spaces
 
-
-
+            conn.close()
+            
+            # Join the sorted paths with spaces for MPV command
+            media = ' '.join(sorted(paths))
             #Reset variables from youtube search
             self.from_youtube = False
             self.current_yt_song = ''
         except Exception as e:
             print("Add playlist audio/video directories to search locally")
             media = -1
-        return media 
+        return media
+
+    def list_tv_show_seasons(self, tv_shows):
+
+
+        # Now, list seasons for the selected TV show
+        conn = sqlite3.connect('jukebox.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name, path, is_folder FROM directories WHERE parent_id = ? AND is_folder = 1 ORDER BY name", (tv_shows[0][0],))
+        seasons = cursor.fetchall()
+        conn.close()
+
+        if seasons:
+            print("Select a season:")
+            for idx, season in enumerate(seasons, start=1):
+                print(f"({idx}) {season[1]}")
+            
+            season_selection = input("Enter number to choose season: ")
+            try:
+                selected_season = seasons[int(season_selection)-1]
+            except (ValueError, IndexError):
+                print("Invalid selection.")
+                return
+            
+            # Now you have the selected season, you can list the episodes or play the entire season
+            return selected_season[2] # return path
+
 
     #Helper for search
     def search_youtube(self,input):
