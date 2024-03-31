@@ -342,7 +342,7 @@ class Jukebox(object):
             else:
                 print(f"Playing: {media_list}")
                 if self.android:
-                    os.system(f'am start -n is.xyz.mpv/is.xyz.mpv.MPVActivity -e filepath {media_list}')
+                    os.system(f'am start -n is.xyz.mpv/is.xyz.mpv.MPVActivity -e filepath /storage/emulated/0/Jukebox/{media_list}')
                 else:
                     os.system(f'mpv {media_list}')
         except Exception as e:
