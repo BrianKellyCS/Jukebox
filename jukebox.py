@@ -120,34 +120,25 @@ class Jukebox(object):
         conn.close()
 
 
-    def search_db_directory(self,query):
+    def search_db_directory(self, query):
         conn = sqlite3.connect('jukebox.db')
         cursor = conn.cursor()
         
-        # Use LIKE operator for a case-insensitive search, and '%' as wildcards for partial matches
-        cursor.execute("SELECT id, name, path, is_folder FROM directories WHERE name LIKE ?", ('%' + query + '%',))
+        # Ensure results are ordered by name for a natural sorting
+        cursor.execute("SELECT id, name, path, is_folder FROM directories WHERE name LIKE ? ORDER BY name", ('%' + query + '%',))
         
         results = cursor.fetchall()
         paths = []
         
         if results:
-            #print(f"Search results for '{query}':")
             for result in results:
-                item_type = "Folder" if result[3] else "File"
-                #print(f"- {result[1]} ({item_type}) [ID: {result[0]}, Path: {result[2]}]")
-                if not result[3]:  # If the result is a file, add its path to the list
+                if not result[3]:  # If the result is a file, it's added to the list
                     paths.append(f'"{result[2]}"')  # Quote the path to handle spaces
 
-            if paths:
-                # Create a command to play all found files with MPV
-                mpv_command = f"mpv {' '.join(paths)}"
-                #print("\nTo play with MPV, use the following command:")
-                #print(mpv_command)
-        else:
-            print(f"No results found for '{query}'.")
-
         conn.close()
-        return ' '.join(paths)
+        
+        # Join the sorted paths with spaces for MPV command
+        return ' '.join(sorted(paths))
 
 
     def index_all(self,):
