@@ -352,11 +352,14 @@ class Jukebox(object):
 
         #Case 1: Check if media is already in playlist directory. 
         media = self.search_db_directory(input)# if self.search_db_directory(input) != -1 else ''
+        print("****",self.currentMediaType)
 
-
-        #Case 2: Search youtube for media
-        if media == '':
+        #Case 2: Search online for media
+        if media == '' and self.currentMediaType == 'Music':
             media = self.search_youtube(input)
+        else:
+            os.system(f'mov-cli -s films {input}')
+            return
 
         return media
 
@@ -476,7 +479,3 @@ if __name__ == "__main__":
     Jukebox.start()
 
 
-'''
-android termux command::
-am start -n is.xyz.mpv/is.xyz.mpv.MPVActivity -e filepath {file}
-'''
