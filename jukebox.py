@@ -336,7 +336,7 @@ class Jukebox(object):
 
     def play(self,media_list):
         try:
-            if self.currentMediaType == "Music" or self.current_media == self.Radio:
+            if self.currentMediaType == "Music" or self.current_media == "Radio":
                 print(f"Playing: {media_list}")
                 os.system(f'mpv --no-video {media_list}')
             else:
@@ -357,7 +357,7 @@ class Jukebox(object):
         #Case 2: Search online for media
         if media == '' and self.currentMediaType == 'Music':
             media = self.search_youtube(input)
-        else:
+        elif media == '' and self.currentMediaType == 'Movie':
             os.system(f'mov-cli -s films {input}')
             return
 
