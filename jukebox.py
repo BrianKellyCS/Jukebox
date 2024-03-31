@@ -32,10 +32,20 @@ class Jukebox(object):
         self.current_yt_song = ''
         self.currentMediaType = "Music"   #will be either Music or Movie
         self.current_media = -1
+        self.android = self.is_android()
 
         self.init_db()
         self.index_all()
 
+
+    def is_android(self):
+        # Check for a common Android environment variable
+        if 'ANDROID_DATA' in os.environ:
+            return True
+
+            
+        # Not detected as Android
+        return False
 
     def init_db(self):
         conn = sqlite3.connect('jukebox.db')
@@ -331,7 +341,10 @@ class Jukebox(object):
                 os.system(f'mpv --no-video {media_list}')
             else:
                 print(f"Playing: {media_list}")
-                os.system(f'mpv {media_list}')
+                if self.android:
+                    os.system(f'am start -n is.xyz.mpv/is.xyz.mpv.MPVActivity -e filepath {media_list}')
+                else:
+                    os.system(f'mpv {media_list}')
         except Exception as e:
             print(e)
 
@@ -461,3 +474,9 @@ class Jukebox(object):
 if __name__ == "__main__":
     Jukebox = Jukebox()
     Jukebox.start()
+
+
+'''
+android termux command::
+am start -n is.xyz.mpv/is.xyz.mpv.MPVActivity -e filepath {file}
+'''
