@@ -30,9 +30,12 @@ class Jukebox(object):
         self.Radio = 'https://media-ice.musicradio.com/Heart80s'
         self.from_youtube = False
         self.current_yt_song = ''
-        self.currentMediaType = "Music"   #will be either Music or Movie
+        self.currentMediaType = "Music"   #will be either Music or Video
         self.current_media = -1
         self.android = self.is_android()
+        self.videoType = 'Youtube' #will be Youtube or Movie
+        self.downloadMovie = False
+        self.checkForPlaylist = False
 
         self.init_db()
         self.index_all()
@@ -106,7 +109,7 @@ class Jukebox(object):
 
     def explore(self):
         media_options = {
-            1: ("Movies", self.movies_path),
+            1: ("Media", self.movies_path),
             2: ("Music", self.music_path),
             3: ("Playlists", self.playlists_path)
         }
@@ -127,7 +130,7 @@ class Jukebox(object):
                 choice_idx = int(choice)
                 if choice_idx in media_options:
                     if choice_idx == 1:
-                        self.currentMediaType = "Movies"
+                        self.currentMediaType = "Video"
                     else:
                         self.currentMediaType = "Music"
                     _, start_path = media_options[choice_idx]
@@ -277,20 +280,40 @@ class Jukebox(object):
 
             elif 'www.youtube.com' in query:
                 if ' -a' in query:
-                    self.download_song(query[0:-3])
+                    query = query.replace(' -a','')
+                    self.download_song(query)
                 else:
                     self.download_video(query)
 
             elif ' -a' in query:
                 self.currentMediaType = "Music"
-                query = query[0:-3]
+                query = query.replace(' -a','')
+                if ' -p' in query:
+                    self.checkForPlaylist = True
+                    query = query.replace(' -p','')
                 print(query)
                 self.current_media = self.search(query)
             elif ' -v' in query:
-                self.currentMediaType = "Movie"
-                query = query[0:-3]
+                self.currentMediaType = "Video"
+                query = query.replace(' -v','')
+                if ' -p' in query:
+                    self.checkForPlaylist = True
+                    query = query.replace(' -p','')
+                if ' -m' in query:
+                    query = query.replace(' -m','')
+                    self.videoType = "Movie"
+                    if ' -d' in query:
+                        query = query.replace(' -d','')
+                        self.downloadMovie == True
+                elif ' -yt' in query:
+                    query = query.replace(' -yt','')
+                    self.videoType = "Youtube"    
+
                 print(query)
                 self.current_media = self.search(query)
+                print("Current media set as: ", self.current_media)
+
+
             elif self.current_media == -1 and query != 'q' and query != 'help':
                 print('Specify if you want audio/video by adding -a or -v after your query (type "help" for more info)')
                 
@@ -351,6 +374,8 @@ class Jukebox(object):
         except Exception as e:
             print(e)
 
+
+
     def search(self,input):
 
         #Case 1: Check if media is already in playlist directory. 
@@ -360,9 +385,14 @@ class Jukebox(object):
         #Case 2: Search online for media
         if media == '' and self.currentMediaType == 'Music':
             media = self.search_youtube(input)
-        elif media == '' and self.currentMediaType == 'Movie':
-            os.system(f'mov-cli -s films {input}')
-            return
+        elif media == '' and self.currentMediaType == 'Video':
+            if self.videoType == 'Movie':
+                print("would be downloading")
+                os.system(f'mov-cli -s films {input} -d')
+                return
+            else:
+                media = self.search_youtube(input)
+
 
         return media
 
@@ -444,20 +474,32 @@ class Jukebox(object):
     #Helper for search
     def search_youtube(self,input):
         #if not found in playlist directory, searches youtube
+
         print(f'Searching for {input}')
         query_string = urllib.parse.urlencode({"search_query": input})
         formatUrl = urllib.request.urlopen("https://www.youtube.com/results?" + query_string)
 
         try:
-            search_results = re.findall(r"watch\?v=(\S{11})", formatUrl.read().decode())
-            audio = self.current_yt_song = "https://www.youtube.com/watch?v=" + "{}".format(search_results[0])
+            #for albums or playlists
+            if self.checkForPlaylist:
+                search_results = re.findall(r"list=([\w-]+)", formatUrl.read().decode())
+                playlist_id = search_results[0]
+                audio = "https://www.youtube.com/playlist?list=" + playlist_id
+            #for single song
+            else:
+                search_results = re.findall(r"watch\?v=(\S{11})", formatUrl.read().decode())
+                audio = self.current_yt_song = "https://www.youtube.com/watch?v=" + "{}".format(search_results[0])
+            
+            print(audio)
+            
+            
 
         except Exception as e:
             print(e)
 
         #Update variable
         self.from_youtube = True
-        
+        print("YOUTUBE SEARCH RETURNING: ", audio)
         return(audio)
 
     def download(self):
