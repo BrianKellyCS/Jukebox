@@ -376,22 +376,30 @@ class Jukebox(object):
 
 
 
-    def search(self,input):
+    def search(self,query):
 
         #Case 1: Check if media is already in playlist directory. 
-        media = self.search_db_directory(input)# if self.search_db_directory(input) != -1 else ''
+        media = self.search_db_directory(query)# if self.search_db_directory(query) != -1 else ''
         print("****",self.currentMediaType)
+        if media:
+            check_online = input(f"Found {media} in your local directory:\nWould you like to play this? (y/n)")
+            print("You entered: ",check_online)
+            if check_online == 'y':
+                return media
 
         #Case 2: Search online for media
-        if media == '' and self.currentMediaType == 'Music':
-            media = self.search_youtube(input)
-        elif media == '' and self.currentMediaType == 'Video':
+        if self.currentMediaType == 'Music':
+            media = self.search_youtube(query)
+        elif self.currentMediaType == 'Video':
             if self.videoType == 'Movie':
-                print("would be downloading")
-                os.system(f'mov-cli -s films {input} -d')
-                return
+                if self.downloadMovie:
+                    print("would be downloading")
+                    os.system(f'mov-cli -s films {query} -d')
+                    return
+                else:
+                    os.system(f'mov-cli -s films {query}')
             else:
-                media = self.search_youtube(input)
+                media = self.search_youtube(query)
 
 
         return media
