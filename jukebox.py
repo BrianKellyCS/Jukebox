@@ -265,6 +265,7 @@ class Jukebox(object):
             if query == 'help':
                 self.menu()
             if query == 'r':
+                print(query)
                 self.currentMediaType == 'Music'
                 self.current_media = self.Radio
             if query == 'u':
@@ -338,7 +339,7 @@ class Jukebox(object):
 
     def play(self,media_list):
         try:
-            if self.currentMediaType == "Music" or self.current_media == "Radio":
+            if self.currentMediaType == "Music" or self.current_media == self.Radio:
                 print(f"Playing: {media_list}")
                 os.system(f'mpv --no-video {media_list}')
             else:
