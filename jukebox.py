@@ -388,7 +388,7 @@ class Jukebox(object):
                 return media
 
         #Case 2: Search online for media
-        media = ''
+        media = -1
         if self.currentMediaType == 'Music':
             media = self.search_youtube(query)
         elif self.currentMediaType == 'Video':
