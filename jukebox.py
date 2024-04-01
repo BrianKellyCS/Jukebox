@@ -399,6 +399,10 @@ class Jukebox(object):
                     return
                 else:
                     os.system(f'mov-cli -s films {query}')
+            elif self.videoType == 'Youtube':
+                media = self.search_youtube(query)
+            
+            #default as youtube search for now
             else:
                 media = self.search_youtube(query)
 
