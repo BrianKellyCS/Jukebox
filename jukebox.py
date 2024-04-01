@@ -304,7 +304,7 @@ class Jukebox(object):
                     self.videoType = "Movie"
                     if ' -d' in query:
                         query = query.replace(' -d','')
-                        self.downloadMovie == True
+                        self.downloadMovie = True
                 elif ' -yt' in query:
                     query = query.replace(' -yt','')
                     self.videoType = "Youtube"    
@@ -396,6 +396,7 @@ class Jukebox(object):
                 if self.downloadMovie:
                     print("would be downloading")
                     os.system(f'mov-cli -s films {query} -d')
+                    self.downloadMovie = False
                     return
                 else:
                     os.system(f'mov-cli -s films {query}')
