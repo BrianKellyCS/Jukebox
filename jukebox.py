@@ -367,7 +367,7 @@ class Jukebox(object):
                 os.system(f'mpv --no-video {media_list}')
             else:
                 print(f"Playing: {media_list}")
-                if self.android:
+                if self.android and self.videoType == 'Movie':
                     os.system(f'am start -n is.xyz.mpv/is.xyz.mpv.MPVActivity -e filepath /storage/emulated/0/Jukebox/{media_list}')
                 else:
                     os.system(f'mpv {media_list}')
