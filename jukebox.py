@@ -257,6 +257,7 @@ class Jukebox(object):
 
     def start(self):
         query = ''
+        self.current_media = -1 #reset current media type
         self.welcome_screen()
         while query != 'q':
             self.current_media = -1
@@ -264,6 +265,7 @@ class Jukebox(object):
             if query == 'help':
                 self.menu()
             if query == 'r':
+                self.currentMediaType == 'Music'
                 self.current_media = self.Radio
             if query == 'u':
                 self.update_username()
