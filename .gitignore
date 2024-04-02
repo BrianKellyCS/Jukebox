@@ -3,3 +3,4 @@ Music/
 Playlists/
 jukebox.db
 config.json
+__pycache__
