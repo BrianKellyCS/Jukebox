@@ -287,6 +287,7 @@ class Jukebox(object):
 
             elif ' -a' in query:
                 self.currentMediaType = "Music"
+                self.checkForPlaylist = False
                 query = query.replace(' -a','')
                 if ' -p' in query:
                     self.checkForPlaylist = True
@@ -295,6 +296,9 @@ class Jukebox(object):
                 self.current_media = self.search(query)
             elif ' -v' in query:
                 self.currentMediaType = "Video"
+                self.videoType = "Youtube"
+                self.checkForPlaylist = False
+                self.downloadMovie = False
                 query = query.replace(' -v','')
                 if ' -p' in query:
                     self.checkForPlaylist = True
@@ -488,7 +492,7 @@ class Jukebox(object):
     #Helper for search
     def search_youtube(self,input):
         #if not found in playlist directory, searches youtube
-
+        audio = -1
         print(f'Searching for {input}')
         query_string = urllib.parse.urlencode({"search_query": input})
         formatUrl = urllib.request.urlopen("https://www.youtube.com/results?" + query_string)
