@@ -38,13 +38,18 @@ def menu():
     print('\tu\t\tUpdate Username\t\t\tu\n')
     print('\tr\t\tRadio\t\t\t\tr\n')
     print('\t-a\t\tAudio\t\t\t\t{search query} -a\n')
-    print('\t-v\t\tVideo\t\t\t\t{search query} -v\n')
+    print('\t-a -p\t\tAudio with Playlist\t\t{search query} -a -p\n')
+    print('\t-v\t\tVideo (search on YouTube by default)\t{search query} -v\n')
+    print('\t-v -p\t\tVideo with Playlist\t\t{search query} -v -p\n')
+    print('\t-v -yt\t\tSpecify YouTube Video\t\t{search query} -v -yt\n')
+    print('\t-v -m\t\tSearch for Movie (mov-cli)\t{search query} -v -m\n')
+    print('\t-v -m -d\tSearch & Download Movie (mov-cli)\t{search query} -v -m -d\n')
 
     # Added explanation for YouTube link downloading feature
     print('\tYouTube Link\tDownload from YouTube\t\tPaste a YouTube link directly to download video.\n'
-        '\t\t\t\t\t\t\tAdd "-a" after the link to download audio only.\n'
-        '\t\t\t\t\t\t\tVideos are saved to the Movies directory;\n'
-        '\t\t\t\t\t\t\taudio files are saved to the Music directory.\n')
+          '\t\t\t\t\t\t\tAdd "-a" after the link to download audio only.\n'
+          '\t\t\t\t\t\t\tVideos are saved to the Movies directory;\n'
+          '\t\t\t\t\t\t\taudio files are saved to the Music directory.\n')
 
     print('\n\tMPV Playback Controls:\n')
     print('\tSPACE\t\tPlay/Pause\n')

@@ -46,11 +46,11 @@ class YouTubeManager:
         print('Saved in playlist')
 
     def download_song(self, current_media):
-        os.system(f'yt-dlp -x -f m4a -o "Music/%(title)s.%(ext)s" {current_media}')
+        os.system(f'yt-dlp -x -f m4a -o "{self.music_path}%(title)s.%(ext)s" {current_media}')
 
 
 
     def download_video(self, current_media):
-        os.system(f'yt-dlp -o "Movies/%(title)s.%(ext)s" {current_media}')
+        os.system(f'yt-dlp -o "{self.movies_path}/%(title)s.%(ext)s" {current_media}')
 
 

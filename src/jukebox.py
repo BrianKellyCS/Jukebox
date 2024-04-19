@@ -93,7 +93,7 @@ class Jukebox(object):
             if self.current_media != -1:
                 self.media_explorer.play(self.current_media, self.currentMediaType, self.videoType, self.Radio)
 
-                if self.current_media != self.Radio and self.from_youtube:
+                if self.current_media != self.Radio and self.videoType != 'Movie':
                     to_download = input('\n\nSave to directory? (y/n)')
                     if to_download == 'y':
                         print(self.current_media)
