@@ -1,6 +1,6 @@
-# Terminal Jukebox
+# Jukebox
 
-Terminal Jukebox is a compact, terminal-based media player that integrates the power of MPV and yt-dlp for a seamless audio and video playback experience. It allows users to play media from specified directories, stream radio, search YouTube for content not available locally, and download it directly to a designated directory for easy management.
+Jukebox is a project for managing local media and playing music/yt-videos/movies without having to open up the browser. It is terminal-based media player that integrates the power of MPV and yt-dlp for a seamless audio and video playback experience. It allows users to play media from specified directories, stream radio, search YouTube for content not available locally, and download it directly to a designated directory for easy management. It also supports searching for and playing movies using `mov-cli`.
 
 ## Features
 
@@ -8,6 +8,7 @@ Terminal Jukebox is a compact, terminal-based media player that integrates the p
 - Stream radio directly from predefined URLs.
 - Search for and play content from YouTube when not available locally.
 - Download media from YouTube and save it to specific directories.
+- Search for movies using the `mov-cli` tool when installed.
 
 ## Getting Started
 
@@ -18,6 +19,7 @@ Ensure you have Python installed on your system. Terminal Jukebox requires Pytho
 You will also need MPV and yt-dlp installed:
 - **MPV**: [Installation Guide](https://mpv.io/installation/)
 - **yt-dlp**: Install using pip with `pip install yt-dlp`
+- **mov-cli** (optional): Install using pip with `pip install mov-cli` [Installation Guide](https://github.com/mov-cli/mov-cli/wiki/Installation)
 
 ### Installation
 
@@ -36,18 +38,25 @@ You will also need MPV and yt-dlp installed:
 To start the Terminal Jukebox, navigate to the cloned directory and run:
 
 ```bash
-python jukebox.py
+python3 app.py
 ```
 
 
 ### Commands
 
-- `help`: Displays help menu with commands and MPV controls.
+The video commands will get improved as I keep working on this. But for now, this is what I use.
+
+- `help`: Displays help menu with commands and usage details.
 - `q`: Quits the Terminal Jukebox application.
 - `r`: Plays streaming radio (default: Heart80s).
 - `{search query} -a`: Searches for and plays audio from YouTube.
-- `{search query} -v`: Searches for and plays video from YouTube.
-- To save media from YouTube to the specified directory, respond `y` when prompted after playback.
+- `{search query} -a -p`: Searches for and plays audio playlists from YouTube.
+- `{search query} -v`: Searches for and plays video from YouTube by default.
+- `{search query} -v -yt`: Explicitly searches for and plays video from YouTube.
+- `{search query} -v -m`: Searches for movies locally, and if not found -> uses the `mov-cli` tool.
+- `{search query} -v -m -d`: Searches for and optionally downloads movies using the `mov-cli` tool.
+
+To save media from YouTube to the specified directory, respond `y` when prompted after playback.
 
 ### MPV Controls
 
@@ -56,10 +65,20 @@ While MPV is focused, you can use the following controls:
 - `q`: Stop playback & quit MPV
 - `>` (Shift + .): Next in playlist
 - `<` (Shift + ,): Previous in playlist
-- Arrow keys: Volume and seek control
+- Arrow keys: Seek backward/forward and adjust volume
 - `m`: Mute
 - `f`: Toggle fullscreen
 - `9`/`0`: Decrease/Increase volume
+
+### Advanced Usage
+
+#### Downloading Media
+
+When you play media from YouTube or use the `mov-cli` for movies, you can choose to download the content. After playback, if you opted to download the media, you will be prompted to save it to a specific directory. Confirm with `y` to proceed with the download.
+
+#### Movie Searches
+
+With `mov-cli` installed, use the `-m` option after `-v` to search for movies. The `-d` option can be used to directly download movies after searching. Ensure you have enough storage space and appropriate permissions set on your machine to save downloads.
 
 ## Customization
 
