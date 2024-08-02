@@ -1,22 +1,21 @@
-import colorama
+from rich.console import Console
+from rich.table import Table
+from rich.text import Text
+from rich.panel import Panel
 
-# Initialize colorama to enhance cross-platform compatibility of colored output
-colorama.init(autoreset=True)
+console = Console()
 
 def colored_prompt(user_name):
-    prompt = (f"{colorama.Fore.LIGHTRED_EX}{user_name}{colorama.Style.RESET_ALL}"
-              f"{colorama.Fore.LIGHTGREEN_EX}@{colorama.Style.RESET_ALL}"
-              f"{colorama.Fore.LIGHTYELLOW_EX}Jukebox{colorama.Style.RESET_ALL}"
-              f"{colorama.Fore.LIGHTBLUE_EX}:{colorama.Style.RESET_ALL}"
-              f"{colorama.Fore.LIGHTMAGENTA_EX}~{colorama.Style.RESET_ALL}"
-              f"{colorama.Fore.LIGHTCYAN_EX}>{colorama.Style.RESET_ALL} ")
+    prompt = (Text(user_name, style="bold red")
+              + Text("@", style="bold green")
+              + Text("Jukebox", style="bold yellow")
+              + Text(":", style="bold blue")
+              + Text("~", style="bold magenta")
+              + Text(">", style="bold cyan") + " ")
     return prompt
 
-
-
-
 def welcome_screen(user_name):
-    ascii_art = """
+    ascii_art = r"""
    ___       _        _               
   |_  |     | |      | |              
     | |_   _| | _____| |__   _____  __
@@ -24,41 +23,63 @@ def welcome_screen(user_name):
 /\__/ / |_| |   <  __/ |_) | (_) >  < 
 \____/ \__,_|_|\_\___|_.__/ \___/_/\_\                 
     """
-    print(f"{colorama.Fore.LIGHTCYAN_EX}{ascii_art}{colorama.Style.RESET_ALL}")
+    console.print(Text(ascii_art, style="bold cyan"))
     welcome_back_message = f"Welcome back, {user_name}!" if user_name != 'user' else "Welcome to the Terminal Jukebox!"
-    print(f"{colorama.Fore.LIGHTYELLOW_EX}{welcome_back_message}{colorama.Style.RESET_ALL}")
-    print(f"{colorama.Fore.LIGHTGREEN_EX}Type 'help' to see the command list and MPV controls{colorama.Style.RESET_ALL}\n")
-
+    console.print(Text(welcome_back_message, style="bold yellow"))
+    console.print(Text("Type 'help' to see the command list and MPV controls", style="bold green"))
+    console.print("\n")
 
 def menu():
-    print('\n\n\tCommand\t\tDesc.\t\t\t\tUsage\n')
-    print('\te\t\tExplore Directories\t\te\n')
-    print('\ts\t\tRe-scan Directories\t\ts\n')
-    print('\tq\t\tQuit Jukebox\t\t\tq\n')
-    print('\tu\t\tUpdate Username\t\t\tu\n')
-    print('\tr\t\tRadio\t\t\t\tr\n')
-    print('\t-a\t\tAudio\t\t\t\t{search query} -a\n')
-    print('\t-a -p\t\tAudio with Playlist\t\t{search query} -a -p\n')
-    print('\t-v\t\tVideo (search on YouTube by default)\t{search query} -v\n')
-    print('\t-v -p\t\tVideo with Playlist\t\t{search query} -v -p\n')
-    print('\t-v -yt\t\tSpecify YouTube Video\t\t{search query} -v -yt\n')
-    print('\t-v -m\t\tSearch for Movie (mov-cli)\t{search query} -v -m\n')
-    print('\t-v -m -d\tSearch & Download Movie (mov-cli)\t{search query} -v -m -d\n')
+    console.print("\n")
+    console.print(Panel(Text("Command List", justify="center"), style="bold magenta", expand=False))
 
-    # Added explanation for YouTube link downloading feature
-    print('\tYouTube Link\tDownload from YouTube\t\tPaste a YouTube link directly to download video.\n'
-          '\t\t\t\t\t\t\tAdd "-a" after the link to download audio only.\n'
-          '\t\t\t\t\t\t\tVideos are saved to the Movies directory;\n'
-          '\t\t\t\t\t\t\taudio files are saved to the Music directory.\n')
+    table = Table(show_header=True, header_style="bold magenta", style="bold blue")
+    table.add_column("Command", style="bold cyan")
+    table.add_column("Description", style="bold yellow")
+    table.add_column("Usage", style="bold green")
 
-    print('\n\tMPV Playback Controls:\n')
-    print('\tSPACE\t\tPlay/Pause\n')
-    print('\tq\t\tStop Playback & Quit MPV\n')
-    print('\t>\t\tNext in Playlist\n')
-    print('\t<\t\tPrevious in Playlist\n')
-    print('\t←/→\t\tSeek Backwards/Forwards\n')
-    print('\tm\t\tMute\n')
-    print('\tf\t\tToggle Fullscreen\n')
-    print('\t9/0\t\tDecrease/Increase Volume\n')
+    commands = [
+        ("e", "Explore Directories", "e"),
+        ("s", "Re-scan Directories", "s"),
+        ("q", "Quit Jukebox", "q"),
+        ("u", "Update Username", "u"),
+        ("r", "Radio", "r"),
+        ("-a", "Audio", "{search query} -a"),
+        ("-a -p", "Audio with Playlist", "{search query} -a -p"),
+        ("-v", "Video (search on YouTube by default)", "{search query} -v"),
+        ("-v -p", "Video with Playlist", "{search query} -v -p"),
+        ("-v -yt", "Specify YouTube Video", "{search query} -v -yt"),
+        ("-v -m", "Search for Movie (mov-cli)", "{search query} -v -m"),
+        ("-v -m -d", "Search & Download Movie (mov-cli)", "{search query} -v -m -d"),
+        ("YouTube Link", "Download from YouTube", "Paste a YouTube link directly to download video.\nAdd \"-a\" after the link to download audio only.\nVideos are saved to the Movies directory;\naudio files are saved to the Music directory.")
+    ]
+    
+    for command, desc, usage in commands:
+        table.add_row(command, desc, usage)
 
-    print('\nNote: These controls are active when MPV is the focused window.\n')
+    console.print(table)
+
+    console.print(Panel(Text("MPV Playback Controls", justify="center"), style="bold magenta", expand=False))
+
+    control_table = Table(show_header=False, style="bold blue")
+    control_table.add_column("Control", style="bold cyan")
+    control_table.add_column("Function", style="bold yellow")
+
+    controls = [
+        ("SPACE", "Play/Pause"),
+        ("q", "Stop Playback & Quit MPV"),
+        (">", "Next in Playlist"),
+        ("<", "Previous in Playlist"),
+        ("←/→", "Seek Backwards/Forwards"),
+        ("m", "Mute"),
+        ("f", "Toggle Fullscreen"),
+        ("9/0", "Decrease/Increase Volume")
+    ]
+    
+    for control, function in controls:
+        control_table.add_row(control, function)
+
+    console.print(control_table)
+
+    console.print("\n[bold magenta]Note:[/bold magenta] These controls are active when MPV is the focused window.\n")
+

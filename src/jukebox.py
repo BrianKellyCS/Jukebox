@@ -3,7 +3,10 @@ from src.display import colored_prompt, welcome_screen, menu
 from src.explorer import MediaExplorer
 from src.youtube import YouTubeManager
 from src.config import ConfigManager
+from rich.console import Console
 
+
+console = Console()
 
 class Jukebox(object):
     def __init__(self):
@@ -52,7 +55,8 @@ class Jukebox(object):
         self.welcome_screen(self.user_name)
         while query != 'q':
             self.current_media = -1
-            query = input(self.colored_prompt(self.user_name))
+            prompt = colored_prompt(self.user_name)
+            query = console.input(prompt)
             if query == 'help':
                 self.menu()
             if query == 'r':
@@ -163,9 +167,3 @@ class Jukebox(object):
                 self.from_youtube, media = self.youtube_manager.search_youtube(query, self.checkForPlaylist)
 
         return media
-
-
-
-
-
-
