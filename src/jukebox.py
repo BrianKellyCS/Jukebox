@@ -43,6 +43,9 @@ class Jukebox(object):
         self.media_explorer.movies_path = self.movies_path
         self.media_explorer.playlists_path = self.playlists_path
 
+        self.youtube_manager.music_path = self.music_path
+        self.youtube_manager.movies_path = self.movies_path
+
     def start(self):
         query = ''
         self.current_media = -1  # reset current media type
@@ -111,7 +114,7 @@ class Jukebox(object):
                     if to_download == 'y':
                         print(self.current_media)
                         self.youtube_manager.download(self.current_media, self.currentMediaType)
-                        self.media_explorer.index_directory
+                        self.media_explorer.index_all()
 
     def update_directory(self):
         print("Which directory would you like to update?")
