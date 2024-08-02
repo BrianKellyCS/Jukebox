@@ -1,8 +1,0 @@
-{
-    "user_name": "user",
-    "directories": {
-        "music_path": "Music/",
-        "movies_path": "Movies/",
-        "playlists_path": "Playlists/"
-    }
-}
