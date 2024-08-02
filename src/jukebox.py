@@ -50,7 +50,7 @@ class Jukebox(object):
             if query == 'e':
                 self.media_explorer.explore(self.currentMediaType, self.current_media, self.videoType, self.Radio)
 
-            elif 'www.youtube.com' in query:
+            elif 'youtube.com' in query:
                 if ' -a' in query:
                     query = query.replace(' -a','')
                     self.youtube_manager.download_song(query)
