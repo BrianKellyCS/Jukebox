@@ -1,5 +1,7 @@
+
+
 import os
-import keyboard
+import readchar
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
@@ -18,43 +20,43 @@ class MediaExplorer(DatabaseManager):
         return 'ANDROID_DATA' in os.environ
 
     def explore(self, currentMediaType, current_media, videoType, Radio):
-        media_options = {
-            1: ("Movies", self.movies_path),
-            2: ("Music", self.music_path),
-            3: ("Playlists", self.playlists_path)
-        }
+            media_options = {
+                1: ("Movies", self.movies_path),
+                2: ("Music", self.music_path),
+                3: ("Playlists", self.playlists_path)
+            }
 
-        while True:
-            self.console.clear()
-            self.console.print(Text("Select media type to explore:", style="bold cyan"))
+            while True:
+                self.console.clear()
+                self.console.print(Text("Select media type to explore:", style="bold cyan"))
 
-            table = Table(show_header=True, header_style="bold magenta")
-            table.add_column("Option", style="dim", width=6)
-            table.add_column("Media Type", style="cyan")
+                table = Table(show_header=True, header_style="bold magenta")
+                table.add_column("Option", style="dim", width=6)
+                table.add_column("Media Type", style="cyan")
 
-            for key, (name, _) in media_options.items():
-                table.add_row(f"({key})", name)
-            table.add_row("(q)", "Quit")
+                for key, (name, _) in media_options.items():
+                    table.add_row(f"({key})", name)
+                table.add_row("(q)", "Quit")
 
-            self.console.print(table)
-            
-            self.console.print(Text("Use the number keys to select a media type or 'q' to quit.", style="bold yellow"))
-            
-            choice = input("\nEnter your choice: ").strip().lower()
+                self.console.print(table)
+                
+                self.console.print(Text("Use the number keys to select a media type or 'q' to quit.", style="bold yellow"))
+                
+                choice = input("\nEnter your choice: ").strip().lower()
 
-            if choice == 'q':
-                break
+                if choice == 'q':
+                    break
 
-            try:
-                choice_idx = int(choice)
-                if choice_idx in media_options:
-                    currentMediaType = "Video" if choice_idx == 1 else "Music"
-                    _, start_path = media_options[choice_idx]
-                    self.navigate_directory(start_path, currentMediaType, current_media, videoType, Radio)
-                else:
-                    self.console.print("Invalid selection. Please try again.", style="bold red")
-            except ValueError:
-                self.console.print("Invalid input. Please enter a number.", style="bold red")
+                try:
+                    choice_idx = int(choice)
+                    if choice_idx in media_options:
+                        currentMediaType = "Video" if choice_idx == 1 else "Music"
+                        _, start_path = media_options[choice_idx]
+                        self.navigate_directory(start_path, currentMediaType, current_media, videoType, Radio)
+                    else:
+                        self.console.print("Invalid selection. Please try again.", style="bold red")
+                except ValueError:
+                    self.console.print("Invalid input. Please enter a number.", style="bold red")
 
     def navigate_directory(self, current_path, currentMediaType, current_media, videoType, Radio):
         history_stack = []
@@ -91,22 +93,21 @@ class MediaExplorer(DatabaseManager):
             input_buffer = ""
 
             while True:
-                key = keyboard.read_event()
-                if key.event_type == "down":
-                    if key.name == "up" and page_start > 0:
-                        index -= 1
-                        break
-                    elif key.name == "down" and page_end < total_items:
-                        index += 1
-                        break
-                    elif key.name == "enter":
-                        break
-                    elif key.name.isdigit() or (key.name == 'q') or (key.name == '0'):
-                        input_buffer += key.name
-                        self.console.print(Text(input_buffer, style="bold green"), end="\r")
-                    elif key.name == "backspace" and input_buffer:
-                        input_buffer = input_buffer[:-1]
-                        self.console.print(Text(input_buffer, style="bold green"), end="\r")
+                key = readchar.readkey()
+                if key == readchar.key.UP and page_start > 0:
+                    index -= 1
+                    break
+                elif key == readchar.key.DOWN and page_end < total_items:
+                    index += 1
+                    break
+                elif key == readchar.key.ENTER:
+                    break
+                elif key.isdigit() or key in ('q', '0'):
+                    input_buffer += key
+                    self.console.print(Text(input_buffer, style="bold green"), end="\r")
+                elif key == readchar.key.BACKSPACE and input_buffer:
+                    input_buffer = input_buffer[:-1]
+                    self.console.print(Text(input_buffer + ' ', style="bold green"), end="\r")
             
             self.console.clear()
             
