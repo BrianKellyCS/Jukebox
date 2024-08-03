@@ -1,7 +1,7 @@
-
-
 import os
 import readchar
+import threading
+import subprocess
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
@@ -14,49 +14,51 @@ class MediaExplorer(DatabaseManager):
         self.movies_path = movies_path
         self.playlists_path = playlists_path
         self.console = Console()
+        self.current_media_thread = None  # Track the current media thread
+        self.current_media_process = None  # Track the current media process
 
     def is_android(self):
         '''termux on android plays videos differently'''
         return 'ANDROID_DATA' in os.environ
 
     def explore(self, currentMediaType, current_media, videoType, Radio):
-            media_options = {
-                1: ("Movies", self.movies_path),
-                2: ("Music", self.music_path),
-                3: ("Playlists", self.playlists_path)
-            }
+        media_options = {
+            1: ("Movies", self.movies_path),
+            2: ("Music", self.music_path),
+            3: ("Playlists", self.playlists_path)
+        }
 
-            while True:
-                self.console.clear()
-                self.console.print(Text("Select media type to explore:", style="bold cyan"))
+        while True:
+            self.console.clear()
+            self.console.print(Text("Select media type to explore:", style="bold cyan"))
 
-                table = Table(show_header=True, header_style="bold magenta")
-                table.add_column("Option", style="dim", width=6)
-                table.add_column("Media Type", style="cyan")
+            table = Table(show_header=True, header_style="bold magenta")
+            table.add_column("Option", style="dim", width=6)
+            table.add_column("Media Type", style="cyan")
 
-                for key, (name, _) in media_options.items():
-                    table.add_row(f"({key})", name)
-                table.add_row("(q)", "Quit")
+            for key, (name, _) in media_options.items():
+                table.add_row(f"({key})", name)
+            table.add_row("(q)", "Quit")
 
-                self.console.print(table)
-                
-                self.console.print(Text("Use the number keys to select a media type or 'q' to quit.", style="bold yellow"))
-                
-                choice = input("\nEnter your choice: ").strip().lower()
+            self.console.print(table)
+            
+            self.console.print(Text("Use the number keys to select a media type or 'q' to quit.", style="bold yellow"))
+            
+            choice = input("\nEnter your choice: ").strip().lower()
 
-                if choice == 'q':
-                    break
+            if choice == 'q':
+                break
 
-                try:
-                    choice_idx = int(choice)
-                    if choice_idx in media_options:
-                        currentMediaType = "Video" if choice_idx == 1 else "Music"
-                        _, start_path = media_options[choice_idx]
-                        self.navigate_directory(start_path, currentMediaType, current_media, videoType, Radio)
-                    else:
-                        self.console.print("Invalid selection. Please try again.", style="bold red")
-                except ValueError:
-                    self.console.print("Invalid input. Please enter a number.", style="bold red")
+            try:
+                choice_idx = int(choice)
+                if choice_idx in media_options:
+                    currentMediaType = "Video" if choice_idx == 1 else "Music"
+                    _, start_path = media_options[choice_idx]
+                    self.navigate_directory(start_path, currentMediaType, current_media, videoType, Radio)
+                else:
+                    self.console.print("Invalid selection. Please try again.", style="bold red")
+            except ValueError:
+                self.console.print("Invalid input. Please enter a number.", style="bold red")
 
     def navigate_directory(self, current_path, currentMediaType, current_media, videoType, Radio):
         history_stack = []
@@ -135,7 +137,7 @@ class MediaExplorer(DatabaseManager):
                             index = 0
                         else:
                             self.console.print(f"Selected File: {selected_path}", style="bold green")
-                            self.play(f'"{selected_path}"', currentMediaType, videoType, Radio)
+                            self.play(selected_path, currentMediaType, videoType, Radio)
                     else:
                         self.console.print("Invalid selection.", style="bold red")
                 except ValueError:
@@ -143,15 +145,42 @@ class MediaExplorer(DatabaseManager):
             input_buffer = ""
 
     def play(self, current_media, currentMediaType, videoType, Radio):
-        try:
-            if currentMediaType == "Music" or current_media == Radio:
-                self.console.print(f"Playing: {current_media}", style="bold green")
-                os.system(f'mpv --no-video {current_media}')
-            else:
-                self.console.print(f"Playing: {current_media}", style="bold green")
-                if self.is_android() and videoType == 'Movie':
-                    os.system(f'am start -n is.xyz.mpv/is.xyz.mpv.MPVActivity -e filepath /storage/emulated/0/Jukebox/{current_media}')
+        # Stop any currently running media thread
+        self.stop_current_media()
+
+        def run_player():
+            try:
+                if currentMediaType == "Music" or current_media == Radio:
+                    self.console.print(f"Playing: {current_media}", style="bold green")
+                    self.current_media_process = subprocess.Popen(
+                        ['mpv', '--no-video', '--really-quiet', current_media],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL
+                    )
                 else:
-                    os.system(f'mpv {current_media}')
-        except Exception as e:
-            self.console.print(f"Error: {e}", style="bold red")
+                    self.console.print(f"Playing: {current_media}", style="bold green")
+                    if self.is_android() and videoType == 'Movie':
+                        self.current_media_process = subprocess.Popen(
+                            ['am', 'start', '-n', 'is.xyz.mpv/is.xyz.mpv.MPVActivity', '-e', 'filepath', f'/storage/emulated/0/Jukebox/{current_media}'],
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL
+                        )
+                    else:
+                        self.current_media_process = subprocess.Popen(
+                            ['mpv', '--really-quiet', current_media],
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL
+                        )
+                self.current_media_process.wait()
+            except Exception as e:
+                self.console.print(f"Error: {e}", style="bold red")
+
+        self.current_media_thread = threading.Thread(target=run_player)
+        self.current_media_thread.start()
+
+    def stop_current_media(self):
+        if self.current_media_process and self.current_media_process.poll() is None:
+            self.current_media_process.terminate()
+            self.current_media_thread.join()
+            self.current_media_thread = None
+            self.current_media_process = None

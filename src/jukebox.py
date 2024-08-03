@@ -5,7 +5,6 @@ from src.youtube import YouTubeManager
 from src.config import ConfigManager
 from rich.console import Console
 
-
 console = Console()
 
 class Jukebox(object):
@@ -61,7 +60,7 @@ class Jukebox(object):
                 self.menu()
             if query == 'r':
                 print(query)
-                self.currentMediaType == 'Music'
+                self.currentMediaType = 'Music'
                 self.current_media = self.Radio
             if query == 'u':
                 self.user_name = self.config_manager.update_username(self.user_name)
@@ -119,6 +118,9 @@ class Jukebox(object):
                         print(self.current_media)
                         self.youtube_manager.download(self.current_media, self.currentMediaType)
                         self.media_explorer.index_all()
+        # Stop the media if 'q' is typed to exit
+        if query == 'q':
+            self.media_explorer.stop_current_media()
 
     def update_directory(self):
         print("Which directory would you like to update?")
