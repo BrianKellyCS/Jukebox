@@ -70,6 +70,14 @@ class Jukebox(object):
                 self.media_explorer.index_all()
             if query == 'e':
                 self.media_explorer.explore(self.currentMediaType, self.current_media, self.videoType, self.Radio)
+            if query == 'pa':
+                self.media_explorer.pause_resume()
+            if query == 'vu':
+                self.media_explorer.increase_volume()
+            elif query == 'vd':
+                self.media_explorer.decrease_volume()
+            elif query == 'st':
+                self.media_explorer.stop_current_media()
 
             elif 'youtube.com' in query:
                 if ' -a' in query:
@@ -106,9 +114,11 @@ class Jukebox(object):
                 self.current_media = self.search(query)
                 print("Current media set as: ", self.current_media)
 
-            elif self.current_media == -1 and query != 'q' and query != 'help' and query != 'u' and query != 's' and query != 'd':
+            elif self.current_media == -1 and query != 'q' and query != 'help' and query != 'u' and query != 's' and query != 'd' and query != 'pa' and query != 'vu' and query != 'vd' and query != 'st':
                 print('Specify if you want audio/video by adding -a or -v after your query (type "help" for more info)')
 
+
+            
             if self.current_media != -1:
                 self.media_explorer.play(self.current_media, self.currentMediaType, self.videoType, self.Radio)
 
@@ -118,6 +128,7 @@ class Jukebox(object):
                         print(self.current_media)
                         self.youtube_manager.download(self.current_media, self.currentMediaType)
                         self.media_explorer.index_all()
+
         # Stop the media if 'q' is typed to exit
         if query == 'q':
             self.media_explorer.stop_current_media()

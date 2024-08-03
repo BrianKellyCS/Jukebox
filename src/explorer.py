@@ -2,10 +2,13 @@ import os
 import readchar
 import threading
 import subprocess
+import json
+import socket
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 from src.database import DatabaseManager
+import platform
 
 class MediaExplorer(DatabaseManager):
     def __init__(self, db_path, music_path, movies_path, playlists_path):
@@ -16,6 +19,14 @@ class MediaExplorer(DatabaseManager):
         self.console = Console()
         self.current_media_thread = None  # Track the current media thread
         self.current_media_process = None  # Track the current media process
+
+        # Determine IPC method based on the platform
+        if platform.system() == "Windows":
+            self.ipc_method = "named_pipe"
+            self.ipc_pipe_path = r"\\.\pipe\mpvsocket"
+        else:
+            self.ipc_method = "socket"
+            self.ipc_socket_path = "/tmp/mpvsocket"
 
     def is_android(self):
         '''termux on android plays videos differently'''
@@ -152,11 +163,18 @@ class MediaExplorer(DatabaseManager):
             try:
                 if currentMediaType == "Music" or current_media == Radio:
                     self.console.print(f"Playing: {current_media}", style="bold green")
-                    self.current_media_process = subprocess.Popen(
-                        ['mpv', '--no-video', '--really-quiet', current_media],
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL
-                    )
+                    if self.ipc_method == "socket":
+                        self.current_media_process = subprocess.Popen(
+                            ['mpv', '--no-video', '--really-quiet', '--input-ipc-server=' + self.ipc_socket_path, current_media],
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL
+                        )
+                    else:  # Windows named pipe
+                        self.current_media_process = subprocess.Popen(
+                            ['mpv', '--no-video', '--really-quiet', '--input-ipc-server=' + self.ipc_pipe_path, current_media],
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL
+                        )
                 else:
                     self.console.print(f"Playing: {current_media}", style="bold green")
                     if self.is_android() and videoType == 'Movie':
@@ -166,11 +184,18 @@ class MediaExplorer(DatabaseManager):
                             stderr=subprocess.DEVNULL
                         )
                     else:
-                        self.current_media_process = subprocess.Popen(
-                            ['mpv', '--really-quiet', current_media],
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL
-                        )
+                        if self.ipc_method == "socket":
+                            self.current_media_process = subprocess.Popen(
+                                ['mpv', '--really-quiet', '--input-ipc-server=' + self.ipc_socket_path, current_media],
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL
+                            )
+                        else:  # Windows named pipe
+                            self.current_media_process = subprocess.Popen(
+                                ['mpv', '--really-quiet', '--input-ipc-server=' + self.ipc_pipe_path, current_media],
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL
+                            )
                 self.current_media_process.wait()
             except Exception as e:
                 self.console.print(f"Error: {e}", style="bold red")
@@ -184,3 +209,27 @@ class MediaExplorer(DatabaseManager):
             self.current_media_thread.join()
             self.current_media_thread = None
             self.current_media_process = None
+
+    def send_command_to_mpv(self, command):
+        try:
+            if self.ipc_method == "socket":
+                sock = socket.socket(socket.AF_UNIX)
+                sock.connect(self.ipc_socket_path)
+                cmd = {'command': command}
+                sock.send((json.dumps(cmd) + '\n').encode('utf-8'))
+                sock.close()
+            else:  # Windows named pipe
+                with open(self.ipc_pipe_path, 'w') as fifo:
+                    cmd = {'command': command}
+                    fifo.write(json.dumps(cmd) + '\n')
+        except Exception as e:
+            self.console.print(f"Error sending command to MPV: {e}", style="bold red")
+
+    def pause_resume(self):
+        self.send_command_to_mpv(['cycle', 'pause'])
+
+    def increase_volume(self):
+        self.send_command_to_mpv(['add', 'volume', 5])
+
+    def decrease_volume(self):
+        self.send_command_to_mpv(['add', 'volume', -5])
