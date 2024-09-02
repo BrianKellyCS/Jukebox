@@ -229,7 +229,7 @@ class MediaExplorer(DatabaseManager):
         self.send_command_to_mpv(['cycle', 'pause'])
 
     def increase_volume(self):
-        self.send_command_to_mpv(['add', 'volume', 5])
+        self.send_command_to_mpv(['add', 'volume', 20])
 
     def decrease_volume(self):
-        self.send_command_to_mpv(['add', 'volume', -5])
+        self.send_command_to_mpv(['add', 'volume', -20])
