@@ -11,7 +11,7 @@ Jukebox is a project for managing local media and playing music/yt-videos/movies
 - Search for movies using the `mov-cli` tool when installed.
 
 ## Getting Started
-
+![welcome screen](./images/welcome.png)
 ### Prerequisites
 
 Ensure you have Python installed on your system. Terminal Jukebox requires Python 3.x.
@@ -39,7 +39,7 @@ python3 app.py
 
 
 ### Commands
-
+![help menu](./images/help.png)
 The video commands will get improved as I keep working on this. But for now, this is what I use.
 
 - `help`: Displays help menu with commands and usage details.
@@ -66,6 +66,8 @@ While MPV is focused, you can use the following controls:
 - `f`: Toggle fullscreen
 - `9`/`0`: Decrease/Increase volume
 
+
+![Alt text describing the image](./images/explore.png)
 ### Advanced Usage
 
 #### Downloading Media
