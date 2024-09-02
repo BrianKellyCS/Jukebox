@@ -1,7 +1,7 @@
 # Jukebox
 
 Jukebox is a project for managing local media and playing music/yt-videos/movies without having to open up the browser. It is terminal-based media player that integrates the power of MPV and yt-dlp for a seamless audio and video playback experience. It allows users to play media from specified directories, stream radio, search YouTube for content not available locally, and download it directly to a designated directory for easy management. It also supports searching for and playing movies using `mov-cli`.
-
+![welcome screen](./images/welcome.png)
 ## Features
 
 - Play audio and video files from local directories.
@@ -11,7 +11,7 @@ Jukebox is a project for managing local media and playing music/yt-videos/movies
 - Search for movies using the `mov-cli` tool when installed.
 
 ## Getting Started
-![welcome screen](./images/welcome.png)
+
 ### Prerequisites
 
 Ensure you have Python installed on your system. Terminal Jukebox requires Python 3.x.
