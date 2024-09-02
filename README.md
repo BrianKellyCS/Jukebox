@@ -28,10 +28,6 @@ You will also need MPV and yt-dlp installed:
     git clone https://github.com/BrianKellyCS/Jukebox.git
     cd Jukebox
     ```
-2. Install required Python packages:
-    ```bash
-    pip install colorama
-    ```
 
 ## Usage
 
