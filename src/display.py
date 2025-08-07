@@ -40,10 +40,15 @@ def menu():
 
     commands = [
         ("e", "Explore Directories", "e"),
+        ("d", "Update Directories", "d"),
         ("s", "Re-scan Directories", "s"),
         ("q", "Quit Jukebox", "q"),
         ("u", "Update Username", "u"),
         ("r", "Radio", "r"),
+        ("st", "Stop playback", "st"),
+        ("pa", "Pause/Resume playback", "pa"),
+        ("vu", "Volume Up", "vu"),
+        ("vd", "Volume Down", "vd"),
         ("-a", "Audio", "{search query} -a"),
         ("-a -p", "Audio with Playlist", "{search query} -a -p"),
         ("-v", "Video (search on YouTube by default)", "{search query} -v"),
