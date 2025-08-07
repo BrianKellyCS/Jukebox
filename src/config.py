@@ -4,6 +4,7 @@ import os
 class ConfigManager:
     def __init__(self, db_path='jukebox.db'):
         self.db_path = db_path
+        self.auto_create_dirs = True
         self.init_config_table()
         self.config = self.load_config()
         self.validate_directories()
@@ -50,8 +51,12 @@ class ConfigManager:
         for key in directory_keys:
             path = self.config.get(key, '')
             if not os.path.exists(path):
-                print(f"The {key.replace('_', ' ')} directory does not exist: {path}")
-                self.update_directory(key)
+                if self.auto_create_dirs:
+                    os.makedirs(path, exist_ok=True)
+                    print(f"Created default directory for {key.replace('_', ' ')} at: {path}")
+                else:
+                    print(f"The {key.replace('_', ' ')} directory does not exist: {path}")
+                    self.update_directory(key)
 
     def update_username(self, current_user_name):
         new_user_name = input("Enter your new user name: ").strip()
