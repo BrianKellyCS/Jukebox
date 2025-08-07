@@ -16,9 +16,8 @@ Jukebox is a project for managing local media and playing music/yt-videos/movies
 
 Ensure you have Python installed on your system. Terminal Jukebox requires Python 3.x.
 
-You will also need MPV and yt-dlp installed:
+You will also need MPV installed:
 - **MPV**: [Installation Guide](https://mpv.io/installation/)
-- **yt-dlp**: Install using pip with `pip install yt-dlp`
 - **mov-cli** (optional): Install using pip with `pip install mov-cli` [Installation Guide](https://github.com/mov-cli/mov-cli/wiki/Installation)
 
 ### Installation
@@ -27,6 +26,10 @@ You will also need MPV and yt-dlp installed:
     ```bash
     git clone https://github.com/BrianKellyCS/Jukebox.git
     cd Jukebox
+    ```
+2. Run install.py to install dependencies.
+    ```bash
+    python3 install.py
     ```
 
 ## Usage
@@ -43,14 +46,24 @@ python3 app.py
 The video commands will get improved as I keep working on this. But for now, this is what I use.
 
 - `help`: Displays help menu with commands and usage details.
+- `e`: Explore directories.
+- `d`: Update directories.
+- `s`: Re-scan directories.
+- `u`: Update username.
 - `q`: Quits the Terminal Jukebox application.
 - `r`: Plays streaming radio (default: Heart80s).
+- `st`: Stop playback.
+- `pa`: Pause/resume playback.
+- `vu`: Volume up.
+- `vd`: Volume down.
 - `{search query} -a`: Searches for and plays audio from YouTube.
 - `{search query} -a -p`: Searches for and plays audio playlists from YouTube.
-- `{search query} -v`: Searches for and plays video from YouTube by default.
+- `{search query} -v`: Searches for and plays video from YouTube (default).
+- `{search query} -v -p`: Searches for and plays video playlists from YouTube.
 - `{search query} -v -yt`: Explicitly searches for and plays video from YouTube.
-- `{search query} -v -m`: Searches for movies locally, and if not found -> uses the `mov-cli` tool.
+- `{search query} -v -m`: Searches for movies locally, and if not found, uses the `mov-cli` tool.
 - `{search query} -v -m -d`: Searches for and optionally downloads movies using the `mov-cli` tool.
+- `YouTube Link`: Paste a YouTube link directly to download the video.  Add `-a` after the link to download audio only. Videos are saved to the Movies directory; audio files are saved to the Music directory.
 
 To save media from YouTube to the specified directory, respond `y` when prompted after playback.
 
